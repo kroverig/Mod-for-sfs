@@ -13,7 +13,7 @@ import kotlin.concurrent.thread
 
 class MarkerService : Service() {
     private val port=45872
-    private val players=ConcurrentHashMap<String,Long>()
+    private val players=ConcurrentHashMap<String,String>()
     @Volatile private var running=false
     @Volatile private var myName="Игрок"
     private var markerX=0.5f
@@ -78,7 +78,7 @@ class MarkerService : Service() {
                     try {
                         val packet=DatagramPacket(buf,buf.size); s.receive(packet)
                         val fields=String(packet.data,0,packet.length,Charsets.UTF_8).split("|")
-                        if(fields.size==3 && fields[0]!=myName) players[fields[0]]=System.currentTimeMillis()
+                        if(fields.size==3 && fields[0]!=myName) {\n                            val x=fields[1].toFloatOrNull()?.coerceIn(0f,1f)\n                            val y=fields[2].toFloatOrNull()?.coerceIn(0f,1f)\n                            if(x!=null && y!=null) players[fields[0]]=String.format(java.util.Locale.US,"%.2f, %.2f",x,y)\n                        }
                     } catch (_:SocketTimeoutException) {}
                     val now=System.currentTimeMillis()
                     players.entries.removeIf { now-it.value>5000 }
